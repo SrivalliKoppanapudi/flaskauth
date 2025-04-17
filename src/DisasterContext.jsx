@@ -17,6 +17,10 @@ const DisasterContextProvider = (props)=>{
       const [message, setMessage] = useState(""); // Store message input
       const navigate = useNavigate();
       const [predictions,setPredictions] = useState([]);
+      const [audioBlob, setAudioBlob] = useState(null);
+      const [lang, setLang] = useState("en-IN"); // defaulting to Hindi
+      const [isEmergency, setIsEmergency] = useState(false);
+      const isValidPassword = /^(?=.[a-z])(?=.[A-Z])(?=.[!@#$%^&(),.?":{}|<>]).+$/.test(password);
 
     
       const registerUser = () => {
@@ -24,7 +28,11 @@ const DisasterContextProvider = (props)=>{
           alert("All fields are required!");
         } else if (password !== confirmPassword) {
           alert("Passwords do not match!");
-        } else {
+        } 
+        else if(!isValidPassword ){
+          alert(" Password is not valid,it must include lowercase, uppercase, and special character ");
+        }
+        else {
           axios.post('http://127.0.0.1:5000/register', { email, password })
             .then(response => {
               console.log(response);
@@ -113,6 +121,9 @@ const DisasterContextProvider = (props)=>{
       
 
         const onSubmitHandler = () =>{
+          if(audioBlob===null && message===""){
+            alert('please enter message or record audio')
+          }
           console.log("submitted")
           if (!navigator.geolocation) {
             alert("Geolocation is not supported by your browser.");
@@ -123,12 +134,20 @@ const DisasterContextProvider = (props)=>{
             (position) => {
               const { latitude, longitude } = position.coords;
               // setLocation({ latitude, longitude });
-      
+              const formData = new FormData();
+formData.append("email", email);
+formData.append("latitude", latitude);
+formData.append("longitude", longitude);
+formData.append("message", message);
+formData.append("audio", audioBlob);  // This is your Blob object
+formData.append("emergency",isEmergency);
               // Send data to Flask backend
               fetch("http://127.0.0.1:5000/submitLocation", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify({ email, latitude, longitude,message }),
+                headers: {
+                  Authorization: `Bearer ${token}`,  // ❗ Do NOT set Content-Type here — browser will do it
+                },
+                body: formData,
               })
                 // .then((response) => {console.log(response);response.json()})
                 .then((response) => {
@@ -140,10 +159,13 @@ const DisasterContextProvider = (props)=>{
                   console.log("📦 Data from backend:", data); // 🔍 log full data
                   alert(`Location sent: ${data.message}`);
                   // If you want to use predicted_categories:
-                  
+                  if(data.hasOwnProperty('error')){
+                    alert(data.error)
+                    return;
+                  }
                   setPredictions(data.predicted_categories)
                   console.log("Predicted Categories:", data.predicted_categories);
-                  navigate('/dashboard')
+                  alert("Your message is sent to government,they will look into it")
                   // You can also store it in state or display it in the UI
                 })
                 // .catch((error) => alert("Error sending location"));
@@ -157,10 +179,12 @@ const DisasterContextProvider = (props)=>{
             }
           );
           setMessage("")
+          setIsEmergency(false)
         }
 
         const value = {
-          onSubmitHandler,message,setMessage,token,setToken,predictions,setPredictions,
+          lang,setLang,isEmergency,setIsEmergency,
+          onSubmitHandler,message,setMessage,token,setToken,predictions,setPredictions,audioBlob,setAudioBlob,
           logInUser,registerUser,password,setPassword,confirmPassword,setConfirmPassword,email,setEmail,logOutUser,navigate
         }
 

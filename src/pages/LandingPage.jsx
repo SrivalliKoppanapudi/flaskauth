@@ -1,16 +1,24 @@
-import React, { useContext , useState} from "react";
+import React, { useContext , useState,useRef,useEffect} from "react";
 import { Link } from "react-router-dom";
 import { DisasterContext } from "../DisasterContext";
 import { FaUserCircle, FaMicrophone } from "react-icons/fa";
 
 let recognition = null; // Global recognition instance
 export default function LandingPage() {
-  const { email, logOutUser, onSubmitHandler,message,setMessage } = useContext(DisasterContext);
+  const {navigate, email, logOutUser, onSubmitHandler,message,setMessage,setAudioBlob,lang,setLang,isEmergency,setIsEmergency } = useContext(DisasterContext);
   let isLoggedIn = email !== "";
 
   const [isListening, setIsListening] = useState(false);
 
-  const toggleSpeechRecognition = () => {
+  const role=localStorage.getItem('role')
+  if(role==='admin'){
+    return <div>
+      <button onClick={()=>navigate('/adminPage')}>Admin Page</button>
+      <button onClick={()=>navigate('/dashboard')}>Admin Dashboard</button>
+    </div>
+  }
+
+  /* const toggleSpeechRecognition = () => {
     if (!("webkitSpeechRecognition" in window)) {
       alert("Your browser does not support speech recognition.");
       return;
@@ -20,7 +28,9 @@ export default function LandingPage() {
       recognition = new window.webkitSpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
+      // recognition.lang = "en-US";
+      // Use the device's default language; this helps in capturing speech from different languages.
+    recognition.lang = navigator.language || "en-US";
 
       recognition.onresult = (event) => {
         let speechText = "";
@@ -50,7 +60,126 @@ export default function LandingPage() {
 
 
   
-  }
+  } */
+
+    /* const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const streamRef = useRef(null); // At the top, alongside mediaRecorderRef
+    let audioBlob=null;
+    
+    const startRecording = async () => {
+      console.log("Starting recording...");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream; // Save the stream
+        const mediaRecorder = new MediaRecorder(stream);
+        console.log("Created MediaRecorder:", mediaRecorder);
+    
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+    
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunksRef.current.push(event.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          console.log("onstop fired");
+          audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          setAudioBlob(audioBlob);
+          setIsListening(false);
+           // 🔴 Stop microphone stream here
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          console.log("Microphone stopped.");
+          onSubmitHandler();
+        };
+    
+        mediaRecorder.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Error accessing microphone", err);
+      }
+    };
+    
+  
+
+    useEffect(() => {
+      if (audioBlob) {
+        console.log("🎙️ audioBlob is ready, calling submit...");
+        onSubmitHandler();
+      }
+    }, [audioBlob]); // 👈 This runs only when audioBlob changes and is truthy
+
+    const stopRecording = () => {
+      console.log("Trying to stop recording...");
+      console.log("mediaRecorderRef.current:", mediaRecorderRef.current);
+      
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
+        mediaRecorderRef.current.stop();
+        console.log("Recording stopped!");
+        
+      } else {
+        alert("Recorder is not active or not initialized.");
+      }
+    };
+    
+  
+    const toggleSpeechRecognition = () => {
+      const recorder = mediaRecorderRef.current;
+      
+      if (recorder && recorder.state === "recording") {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    };
+     */
+    const toggleSpeechRecognition = () => {
+      if (!("webkitSpeechRecognition" in window)) {
+        alert("Your browser does not support speech recognition.");
+        return;
+      }
+    
+      if (!recognition) {
+        recognition = new window.webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+    
+        recognition.lang = lang; // Use the selected Indian language
+    
+        recognition.onresult = (event) => {
+          let speechText = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            speechText += event.results[i][0].transcript + " ";
+          }
+          setMessage(speechText.trim());
+        };
+    
+        recognition.onerror = (event) => console.error("Speech recognition error:", event);
+        recognition.onend = () => {
+          console.log("Speech recognition ended");
+          setIsListening(false);
+        };
+      } else {
+        recognition.lang = lang; // Update lang if already initialized
+      }
+    
+      if (isListening) {
+        recognition.stop();
+        console.log("Stopped listening");
+        onSubmitHandler(); // Process the result
+      } else {
+        recognition.start();
+        console.log("Listening...");
+      }
+    
+      setIsListening(!isListening);
+    };
+    
+
+
 
 
   const styles = {
@@ -172,10 +301,31 @@ export default function LandingPage() {
       {/* <FaMicrophone style={{ color: "black", fontSize: "24px" }} /> */}
       <FaMicrophone style={{ color: isListening ? "red" : "black", fontSize: "24px" }} />
     </div>
+    <select id="languageSelect" onChange={(e) => setLang(e.target.value)} value={lang}>
+  <option value="en-IN">English (India)</option>
+  <option value="hi-IN">Hindi (हिन्दी)</option>
+  <option value="ta-IN">Tamil (தமிழ்)</option>
+  <option value="te-IN">Telugu (తెలుగు)</option>
+  <option value="bn-IN">Bengali (বাংলা)</option>
+  <option value="gu-IN">Gujarati (ગુજરાતી)</option>
+  <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+  <option value="ml-IN">Malayalam (മലയാളം)</option>
+  <option value="mr-IN">Marathi (मराठी)</option>
+  <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
+  <option value="ur-IN">Urdu (اردو)</option>
+</select>
+<label style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+        <input type="checkbox" checked={isEmergency} onChange={(e) => setIsEmergency(e.target.checked)} />
+        Emergency
+      </label>
+
+            <br/>
             <button style={styles.btnMsg} onClick={onSubmitHandler}>
               Submit
             </button>
+
           </div>
+          
         )}
 
         {!isLoggedIn && (

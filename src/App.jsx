@@ -9,7 +9,8 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AdminPage from './pages/AdminPage';
 import AdminDashboard from './pages/AdminDashboard';
- 
+import './fixLeafletIcon';
+
 function App() {
   return (
     <div className="vh-100 gradient-custom">

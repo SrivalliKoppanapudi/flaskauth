@@ -28,7 +28,7 @@ const AdminPage = ()=>{
     }
     else{
       // fetch("http://localhost:5000/get_messages") // Replace with your API
-      fetch("http://localhost:5000/get_messages", {
+      fetch("http://localhost:5000/get_messages_admin", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

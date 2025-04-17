@@ -65,6 +65,8 @@ export default function RegisterPage() {
 
   const linkStyle = { color: "lightblue", textDecoration: "none" };
 
+  
+
   return (
     <div style={containerStyle}>
       <div style={formContainerStyle}>
