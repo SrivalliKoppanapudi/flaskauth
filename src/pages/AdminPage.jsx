@@ -66,8 +66,8 @@ const AdminPage = ()=>{
         return (
             <div className="container">
                 <div className="head-div">
-                <h2>Admin Dashboard</h2>
-                <button style={styles.btnMsg} onClick={logOutUser} >Logout</button>
+                <h2>Admin Page</h2>
+                
                 </div>
                 <div className="table-container">
                     <table>

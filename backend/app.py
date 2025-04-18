@@ -664,7 +664,7 @@ def receive_location():
 
                 update_category_counts(predicted_labels)
                 # After prediction is done
-                log_requests(predicted_labels)
+                log_requests(predicted_labels,user_msg)
 
 
             return jsonify({
@@ -757,12 +757,12 @@ def update_category_counts(predicted_labels):
 
 
 
-def log_requests(predicted_labels):
+def log_requests(predicted_labels,user_msg):
     for label in predicted_labels:
-        RequestLog(category=label).save()
+        RequestLog(category=label,message=user_msg).save()
 
 def send_summary_emails():
-    two_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+    two_minutes_ago = datetime.utcnow() - timedelta(minutes=2)
     recent_requests = RequestLog.objects(timestamp__gte=two_minutes_ago)
     print(recent_requests)
 
@@ -776,21 +776,23 @@ def send_summary_emails():
 
     for category, requests in category_data.items():
         count = len(requests)
-        message = f"There have been {count} new '{category}' requests in the past 5 minutes."
+        message = f"There have been {count} new '{category}' requests in the past 2 minutes."
         if category != "Not Related" and category in category_email_info:
             info = category_email_info[category]
         # Replace this with actual department email and sending logic
         # send_email(to=f"{category.lower()}@department.com", subject="Disaster Alert", body=message)
             send_email(f"Disaster Alert: {category}", message, info["email"])
             for req in requests:
-                user_msg = UserMessage.objects(id=req.message_id).first()
+                print(req)
+                user_msg = UserMessage.objects(id=req._id).first()
                 if user_msg and user_msg.status != "resolved":
                     user_msg.status = "resolved"
                     user_msg.save()
+                    print('updated')
 
 
 
-scheduler.add_job(send_summary_emails, 'interval', minutes=5)
+scheduler.add_job(send_summary_emails, 'interval', minutes=2)
 scheduler.start()
 
 def send_email(subject, content, to_email):
@@ -804,10 +806,10 @@ def send_email(subject, content, to_email):
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login("miniprojectml2k25@gmail.com", "iuho huhm gqyi bdif")  # ← Use your real app password
             smtp.send_message(msg)
-        print(f"✅ Email sent to {to_email} for category: {subject}")
+        print(f" Email sent to {to_email} for category: {subject}")
     except Exception as e:
         import traceback
-        print(f"❌ Error sending email to {to_email} for {subject}:")
+        print(f" Error sending email to {to_email} for {subject}:")
         print(traceback.format_exc())
 
 # ✅ Handle predicted categories
@@ -819,7 +821,7 @@ def handle_classification_and_email(predicted_labels):
             info = category_email_info[category]
             if info["email"]:
                 send_email(f"Disaster Alert: {category}", info["message"], info["email"])
-                # ✅ Update status of related messages to 'resolved'
+                
             
 
 

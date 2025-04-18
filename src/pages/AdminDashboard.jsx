@@ -180,7 +180,7 @@ const AdminDashboard = () => {
     
     // Group messages by location
     messages
-      .filter(msg => msg.status !== 'resolved' && msg.location && msg.location.coordinates)
+      .filter(msg => msg.location && msg.location.coordinates)
       .forEach(msg => {
         const [lng, lat] = msg.location.coordinates;
         const locationKey = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
@@ -238,7 +238,8 @@ const AdminDashboard = () => {
         const coords = await geocodeLocation(msg.location);
         if (coords) {
           msg.location = {
-            coordinates: [coords.lng, coords.lat]
+            coordinates: [coords.lng, coords.lat],
+            loc:msg.location
           };
           processed.push(msg);
         }
@@ -263,6 +264,7 @@ const AdminDashboard = () => {
         // setMessages(response.data.reports);
         const preparedMessages = await preprocessMessages(response.data.reports);
         setMessages(preparedMessages);
+        console.log(preparedMessages)
       }
       setLoading(false);
     } catch (error) {
@@ -297,10 +299,10 @@ const AdminDashboard = () => {
       for(const key in msg.classification){
         analysis.reportsByType[key] = (analysis.reportsByType[key] || 0) + 1;
       }
-
+//reports by location
       
           if (msg.location) {
-            const locationKey = msg.location;
+            const locationKey = msg.location.loc;
           
             if (!analysis.reportsByLocation[locationKey]) {
               analysis.reportsByLocation[locationKey] = {
@@ -329,6 +331,7 @@ const AdminDashboard = () => {
     });
 
     setAnalytics(analysis);
+    
   };
 
   const isUrgent = (msg) => {
@@ -505,6 +508,12 @@ const AdminDashboard = () => {
   if (error) {
     return <div className="text-center p-4 text-red-600">Error: {error}</div>;
   }
+  const filteredMessages = messages.filter(msg => {
+    if (filter === 'all') return true;
+    if (filter === 'urgent') return isUrgent(msg);
+    return msg.status === filter;
+  });
+  
 
   return (
     <div className="container-fluid p-4">
@@ -523,7 +532,7 @@ const AdminDashboard = () => {
         <div className="col-md-3">
           <div className="card bg-danger text-white">
             <div className="card-body">
-              <h5 className="card-title">Urgent Reports</h5>
+              <h5 className="card-title">Emergency</h5>
               <h2>{analytics.urgentReports}</h2>
             </div>
           </div>
@@ -531,7 +540,7 @@ const AdminDashboard = () => {
         <div className="col-md-3">
           <div className="card bg-success text-white">
             <div className="card-body">
-              <h5 className="card-title">Resolved</h5>
+              <h5 className="card-title">Informed</h5>
               <h2>{analytics.resolvedReports}</h2>
             </div>
           </div>
@@ -573,7 +582,7 @@ const AdminDashboard = () => {
                   <tr>
                     <th>Location</th>
                     <th>Total Reports</th>
-                    <th>Urgent Reports</th>
+                    <th>Emergency</th>
                     <th>Emergency Categories</th>
                     <th>Percentage of Total</th>
                   </tr>
@@ -605,30 +614,30 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Filters and Map */}
+      {/* Filters and Map */} 
       <div className="row">
         <div className="col-md-4">
           <div className="card">
             <div className="card-header">
-              <h3>Emergency Reports</h3>
+              <h3>Reports</h3>
               <select 
                 className="form-select mt-2"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
                 <option value="all">All Reports</option>
-                <option value="urgent">Urgent Only</option>
+                <option value="urgent">Emergency</option>
                 <option value="pending">Pending</option>
-                <option value="resolved">Resolved</option>
+                <option value="resolved">Informed</option>
               </select>
             </div>
             <div className="card-body" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-              {messages.map((msg, index) => (
+              {filteredMessages.map((msg, index) => (
                 <div 
                   key={msg.id || index} 
                   ref={el => messageRefs.current[msg.id] = el}
                   className={`message-item mb-3 p-3 border rounded ${
-                    isUrgent(msg.message) ? 'border-danger' : ''
+                    isUrgent(msg) ? 'border-danger' : ''
                   } ${selectedMessageId === msg.id ? 'bg-light' : ''}`}
                   onClick={() => msg.location?.coordinates && handleMessageClick(msg.id, msg.location.coordinates)}
                   style={{ cursor: msg.location?.coordinates ? 'pointer' : 'default' }}
@@ -661,7 +670,7 @@ const AdminDashboard = () => {
               <h3>Report Locations</h3>
               <div className="mt-2">
                 <small className="text-muted">
-                  {messages.filter(msg => msg.location && msg.location.coordinates && msg.status !== 'resolved').length} of {messages.length} reports have location data
+                  {messages.filter(msg => msg.location && msg.location.coordinates).length} of {messages.length} reports have location data
                 </small>
               </div>
             </div>
@@ -695,7 +704,7 @@ const AdminDashboard = () => {
                       <Popup maxWidth={300}>
   <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
     <h6>Reports at this location: {marker.count}</h6>
-    <p>Urgent reports: {marker.urgentCount}</p>
+    <p>Emergency reports: {marker.urgentCount}</p>
     <hr />
     {marker.messages.map((msg, i) => (
       <div key={i} className="mb-2">
@@ -710,7 +719,7 @@ const AdminDashboard = () => {
               <ul className="mb-0">
                 {Object.entries(msg.classification).map(([key, value]) => (
                   <li key={key}>
-                    {key}: {(value * 100).toFixed(1)}%
+                    {key}
                   </li>
                 ))}
               </ul>

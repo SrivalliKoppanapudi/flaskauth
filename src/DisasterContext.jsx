@@ -76,11 +76,9 @@ const DisasterContextProvider = (props)=>{
 
          // ✅ Navigate based on role
          toast.success("Login successful")
-         if (roleFromServer === "admin") {
-          navigate("/adminPage");
-        } else {
+         
           navigate("/");
-        }
+        
     
             })
             .catch(error => {
@@ -165,7 +163,7 @@ formData.append("emergency",isEmergency);
                   }
                   setPredictions(data.predicted_categories)
                   console.log("Predicted Categories:", data.predicted_categories);
-                  alert("Your message is sent to government,they will look into it")
+                  navigate('/redirect')
                   // You can also store it in state or display it in the UI
                 })
                 // .catch((error) => alert("Error sending location"));

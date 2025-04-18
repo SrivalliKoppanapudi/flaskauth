@@ -9,13 +9,145 @@ export default function LandingPage() {
   let isLoggedIn = email !== "";
 
   const [isListening, setIsListening] = useState(false);
+  
+  const styles = {
+    page: {
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      background: "linear-gradient(180deg, rgb(28, 43, 109), rgb(75, 83, 117))",
+      color: "white",
+      fontFamily: "'Arial', sans-serif",
+      margin: 0,
+      padding: "20px", // Padding for better spacing on smaller screens
+    },
+    overlay: {
+      position: "relative",
+      background: "rgba(39, 38, 38, 0.6)",
+      padding: "50px",
+      borderRadius: "10px",
+      boxShadow: "0 0 20px rgba(0, 0, 0, 0.5)",
+      width: "90%",
+      maxWidth: "600px", // Limits width on larger screens
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    title: {
+      fontSize: "2rem",
+      fontWeight: "bold",
+      textShadow: "3px 3px 6px rgba(0, 0, 0, 0.5)",
+      marginBottom: "15px",
+    },
+    text: {
+      fontSize: "1rem",
+      marginBottom: "15px",
+    },
+    button: {
+      padding: "8px 20px",
+      fontSize: "1rem",
+      borderRadius: "10px",
+      textDecoration: "none",
+      margin: "5px",
+      transition: "all 0.3s ease-in-out",
+      boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.3)",
+      backgroundColor: "white",
+      color: "black",
+      border: "none",
+      cursor: "pointer",
+    },
+    userNav: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      width: "100%",
+      marginBottom: "15px",
+    },
+    userIcon: {
+      fontSize: "2.5rem",
+      color: "white",
+      cursor: "pointer",
+    },
+    msgInputContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "0.8rem",
+      flexWrap: "wrap",
+      width: "100%",
+    },
+    msgInput: {
+      border: "none",
+      outline: "none",
+      padding: "8px",
+      width: "80%",
+      maxWidth: "300px",
+      borderRadius: "5px",
+      textAlign: "center",
+    },
+    btnMsg: {
+      padding: "8px 15px",
+      outline: "none",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontSize: "1rem",
+    },
+    linkContainer: {
+      display: "flex",
+      justifyContent:"space-between",
+      alignItems: "center",
+    },
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '2rem',
+      backgroundColor: '#f5f7fa',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      maxWidth: '400px',
+      margin: '4rem auto',
+    },
+    heading: {
+      color: '#1F2D6D',
+      marginBottom: '2rem',
+      fontSize: '2rem',
+    },
+    adminbutton: {
+      margin: '0.5rem 0',
+      padding: '0.75rem 1.5rem',
+      fontSize: '1rem',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      width: '100%',
+      backgroundColor: '#1F2D6D',
+      color: '#fff',
+      transition: 'background-color 0.3s ease',
+    },
+    logoutButton: {
+      backgroundColor: '#495175',
+    },
+  };
 
   const role=localStorage.getItem('role')
-  if(role==='admin'){
-    return <div>
-      <button onClick={()=>navigate('/adminPage')}>Admin Page</button>
-      <button onClick={()=>navigate('/dashboard')}>Admin Dashboard</button>
-    </div>
+  if (role === 'admin') {
+    return (
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Welcome Admin</h2>
+        <button style={styles.adminbutton} onClick={() => navigate('/adminPage')}>Admin Page</button>
+        <button style={styles.adminbutton} onClick={() => navigate('/dashboard')}>Admin Dashboard</button>
+        <button
+          style={{ ...styles.adminbutton, ...styles.logoutButton }}
+          onClick={logOutUser}
+        >
+          Logout
+        </button>
+      </div>
+    );
   }
 
   /* const toggleSpeechRecognition = () => {
@@ -182,97 +314,6 @@ export default function LandingPage() {
 
 
 
-  const styles = {
-    page: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center",
-      background: "linear-gradient(180deg, rgb(28, 43, 109), rgb(75, 83, 117))",
-      color: "white",
-      fontFamily: "'Arial', sans-serif",
-      margin: 0,
-      padding: "20px", // Padding for better spacing on smaller screens
-    },
-    overlay: {
-      position: "relative",
-      background: "rgba(39, 38, 38, 0.6)",
-      padding: "50px",
-      borderRadius: "10px",
-      boxShadow: "0 0 20px rgba(0, 0, 0, 0.5)",
-      width: "90%",
-      maxWidth: "600px", // Limits width on larger screens
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: "bold",
-      textShadow: "3px 3px 6px rgba(0, 0, 0, 0.5)",
-      marginBottom: "15px",
-    },
-    text: {
-      fontSize: "1rem",
-      marginBottom: "15px",
-    },
-    button: {
-      padding: "8px 20px",
-      fontSize: "1rem",
-      borderRadius: "10px",
-      textDecoration: "none",
-      margin: "5px",
-      transition: "all 0.3s ease-in-out",
-      boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.3)",
-      backgroundColor: "white",
-      color: "black",
-      border: "none",
-      cursor: "pointer",
-    },
-    userNav: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      width: "100%",
-      marginBottom: "15px",
-    },
-    userIcon: {
-      fontSize: "2.5rem",
-      color: "white",
-      cursor: "pointer",
-    },
-    msgInputContainer: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "0.8rem",
-      flexWrap: "wrap",
-      width: "100%",
-    },
-    msgInput: {
-      border: "none",
-      outline: "none",
-      padding: "8px",
-      width: "80%",
-      maxWidth: "300px",
-      borderRadius: "5px",
-      textAlign: "center",
-    },
-    btnMsg: {
-      padding: "8px 15px",
-      outline: "none",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      fontSize: "1rem",
-    },
-    linkContainer: {
-      display: "flex",
-      justifyContent:"space-between",
-      alignItems: "center",
-    },
-  };
 
   return (
     <div style={styles.page}>

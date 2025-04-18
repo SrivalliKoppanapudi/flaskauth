@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage'
 import AdminPage from './pages/AdminPage';
 import AdminDashboard from './pages/AdminDashboard';
 import './fixLeafletIcon';
+import Redirect from './pages/Redirect';
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path='/adminPage' element={<AdminPage/>} />
             <Route path='/dashboard' element={<AdminDashboard/>} />
+            <Route path='/redirect' element={<Redirect/>} />
+
         </Routes>
       
     </div>
